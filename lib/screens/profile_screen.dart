@@ -154,7 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final name = currentUser?.displayName ?? 'User';
     final String initial = email.isNotEmpty ? email[0].toUpperCase() : 'U';
 
-    final isDark = themeNotifier.value == ThemeMode.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile'), centerTitle: true),
@@ -242,11 +242,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     value: isDark,
                     onChanged: (val) {
-                      setState(() {
-                        themeNotifier.value = val
-                            ? ThemeMode.dark
-                            : ThemeMode.light;
-                      });
+                      MyApp.changeTheme(
+                        context,
+                        val ? ThemeMode.dark : ThemeMode.light,
+                      );
                     },
                     activeColor: const Color(0xFF1E88E5),
                   ),
