@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
-import 'favorites_screen.dart';
+
 import 'profile_screen.dart';
 
 import 'bookings_screen.dart'; // Import bookings screen
@@ -17,7 +17,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const FavoritesScreen(),
+
     const BookingsScreen(), // New Booking Tab
     const ProfileScreen(),
   ];
@@ -41,11 +41,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             selectedIcon: Icon(Icons.home),
             label: 'Home',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.favorite_border),
-            selectedIcon: Icon(Icons.favorite),
-            label: 'Favorites',
-          ),
+
           NavigationDestination(
             icon: Icon(Icons.airplane_ticket_outlined),
             selectedIcon: Icon(Icons.airplane_ticket),

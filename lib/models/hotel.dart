@@ -6,7 +6,6 @@ class Hotel {
   final double rating;
   final double price; // Stored as double for calculation, display as string
   final String address;
-  final bool isFavorite; // Local state usage
 
   Hotel({
     required this.id,
@@ -16,7 +15,6 @@ class Hotel {
     required this.rating,
     required this.price,
     required this.address,
-    this.isFavorite = false,
   });
 
   // Factory to create from Firestore

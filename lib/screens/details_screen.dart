@@ -14,68 +14,14 @@ class DetailsScreen extends StatefulWidget {
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
-  bool isFavorite = false;
-  final User? user = FirebaseAuth.instance.currentUser;
-
   @override
   void initState() {
     super.initState();
-    _checkIfFavorite();
-  }
-
-  // 1. فحص هل الفندق بالمفضلة؟
-  Future<void> _checkIfFavorite() async {
-    if (user == null) return;
-
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .collection('favorites')
-        .doc(widget.hotel.id)
-        .get();
-
-    if (mounted) {
-      setState(() {
-        isFavorite = doc.exists;
-      });
-    }
-  }
-
-  // 2. تبديل حالة المفضلة
-  Future<void> _toggleFavorite() async {
-    if (user == null) return;
-
-    final ref = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .collection('favorites')
-        .doc(widget.hotel.id);
-
-    setState(() {
-      isFavorite = !isFavorite;
-    });
-
-    if (isFavorite) {
-      // إضافة للمفضلة
-      await ref.set({'addedAt': FieldValue.serverTimestamp()});
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Added to favorites ❤️")));
-      }
-    } else {
-      // إزالة من المفضلة
-      await ref.delete();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Removed from favorites 💔")),
-        );
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
     return Scaffold(
       body: Stack(
         children: [
@@ -108,18 +54,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.black),
                     onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-
-                // زر المفضلة الجديد
-                CircleAvatar(
-                  backgroundColor: Colors.white.withOpacity(0.8),
-                  child: IconButton(
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : Colors.grey,
-                    ),
-                    onPressed: _toggleFavorite,
                   ),
                 ),
               ],
@@ -251,7 +185,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 try {
                   await FirebaseFirestore.instance
                       .collection('users')
-                      .doc(user!.uid)
+                      .doc(user.uid)
                       .collection('bookings')
                       .add({
                         'hotelId': widget.hotel.id,

@@ -12,35 +12,14 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  /// دالة لتغيير الثيم من أي مكان في التطبيق
-  static void changeTheme(BuildContext context, ThemeMode themeMode) {
-    final _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
-    state?.changeTheme(themeMode);
-  }
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  ThemeMode _themeMode = ThemeMode.light;
-
-  void changeTheme(ThemeMode themeMode) {
-    setState(() {
-      _themeMode = themeMode;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Luxury Hotels',
       debugShowCheckedModeBanner: false,
-      themeMode: _themeMode,
-
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
@@ -56,25 +35,6 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ),
-        scaffoldBackgroundColor: const Color(0xFF121212),
-
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: const Color(0xFF2C2C2C),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-        ),
-      ),
-
       home: const AuthWrapper(),
     );
   }

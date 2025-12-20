@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../main.dart';
+
 import 'login_screen.dart'; // Import LoginScreen
 
 class ProfileScreen extends StatefulWidget {
@@ -154,8 +154,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final name = currentUser?.displayName ?? 'User';
     final String initial = email.isNotEmpty ? email[0].toUpperCase() : 'U';
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       appBar: AppBar(title: const Text('Profile'), centerTitle: true),
       body: SingleChildScrollView(
@@ -219,35 +217,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Icons.lock,
                     "Change Password",
                     _changePassword,
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-
-                  // Dark Mode Switch
-                  SwitchListTile(
-                    secondary: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: Colors.deepPurpleAccent,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.dark_mode,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                    title: const Text(
-                      "Dark Mode",
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                    value: isDark,
-                    onChanged: (val) {
-                      MyApp.changeTheme(
-                        context,
-                        val ? ThemeMode.dark : ThemeMode.light,
-                      );
-                    },
-                    activeColor: const Color(0xFF1E88E5),
                   ),
                 ],
               ),
