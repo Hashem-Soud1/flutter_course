@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
+import '../services/profile_service.dart';
+import '../services/auth_service.dart';
 
 import 'login_screen.dart'; // Import LoginScreen
 
@@ -11,9 +13,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final User? user = FirebaseAuth.instance.currentUser;
-
   Future<void> _editName() async {
+    final user = ProfileService().currentUser;
     final TextEditingController nameController = TextEditingController(
       text: user?.displayName,
     );
@@ -37,8 +38,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           TextButton(
             onPressed: () async {
               try {
-                await user?.updateDisplayName(nameController.text.trim());
-                await user?.reload();
+                await ProfileService().updateDisplayName(
+                  nameController.text.trim(),
+                );
                 setState(() {});
                 if (mounted) Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -58,6 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _editEmail() async {
+    final user = ProfileService().currentUser;
     final TextEditingController emailController = TextEditingController(
       text: user?.email,
     );
@@ -82,9 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () async {
               try {
                 // Using standard verifyBeforeUpdateEmail
-                await user?.verifyBeforeUpdateEmail(
-                  emailController.text.trim(),
-                );
+                await ProfileService().updateEmail(emailController.text.trim());
                 if (mounted) Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -127,7 +128,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           TextButton(
             onPressed: () async {
               try {
-                await user?.updatePassword(passController.text.trim());
+                await ProfileService().updatePassword(
+                  passController.text.trim(),
+                );
                 if (mounted) Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -149,7 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = FirebaseAuth.instance.currentUser;
+    final currentUser = AuthService().currentUser;
     final email = currentUser?.email ?? 'No Email';
     final name = currentUser?.displayName ?? 'User';
     final String initial = email.isNotEmpty ? email[0].toUpperCase() : 'U';
@@ -229,7 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: TextButton.icon(
                 onPressed: () async {
-                  await FirebaseAuth.instance.signOut();
+                  await AuthService().signOut();
                   // رجوع يدوي لصفحة الدخول ومسح التاريخ السابق
                   if (context.mounted) {
                     Navigator.of(context).pushAndRemoveUntil(

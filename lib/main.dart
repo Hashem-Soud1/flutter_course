@@ -45,15 +45,12 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. هل المستخدم مسجل دخول حالياً؟
     final user = FirebaseAuth.instance.currentUser;
 
-    // 2. إذا نعم، اعرض الهوم
     if (user != null) {
       return const MainNavigationScreen();
     }
 
-    // 3. إذا لأ، اعرض اللوجن
     return const LoginScreen();
   }
 }

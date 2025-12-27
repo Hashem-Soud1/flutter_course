@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../services/home_service.dart';
 import '../models/hotel.dart';
 import '../widgets/hotel_card.dart';
 import 'details_screen.dart';
@@ -12,13 +13,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Future<QuerySnapshot> _hotelsFuture;
+  late Future<List<Hotel>> _hotelsFuture;
 
   @override
   void initState() {
     super.initState();
     // جلب الفنادق مرة واحدة عند الفتح
-    _hotelsFuture = FirebaseFirestore.instance.collection('hotels').get();
+    _hotelsFuture = HomeService().getHotels();
   }
 
   @override
@@ -39,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: FutureBuilder<QuerySnapshot>(
+      body: FutureBuilder<List<Hotel>>(
         future: _hotelsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -49,16 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return const Center(child: Text("Error loading hotels"));
           }
 
-          final hotels =
-              snapshot.data?.docs
-                  .map(
-                    (doc) => Hotel.fromMap(
-                      doc.data() as Map<String, dynamic>,
-                      doc.id,
-                    ),
-                  )
-                  .toList() ??
-              [];
+          final hotels = snapshot.data ?? [];
 
           if (hotels.isEmpty) {
             return const Center(child: Text("No hotels found"));

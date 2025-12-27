@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../models/hotel.dart';
+
 import '../widgets/hotel_card.dart';
+import '../services/booking_service.dart';
+import '../services/auth_service.dart';
 import 'details_screen.dart';
-
-// موديل مساعد لتخزين الفندق مع معرف الحجز الخاص فيه
-class BookingItem {
-  final String bookingId;
-  final Hotel hotel;
-
-  BookingItem({required this.bookingId, required this.hotel});
-}
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -21,7 +13,7 @@ class BookingsScreen extends StatefulWidget {
 }
 
 class _BookingsScreenState extends State<BookingsScreen> {
-  final userId = FirebaseAuth.instance.currentUser?.uid;
+  final userId = AuthService().currentUser?.uid;
 
   bool isLoading = true;
   List<BookingItem> myBookings = []; // استخدام القائمة الجديدة
@@ -35,34 +27,22 @@ class _BookingsScreenState extends State<BookingsScreen> {
   Future<void> _getData() async {
     if (userId == null) return;
 
-    final snapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('bookings')
-        .orderBy('bookedAt', descending: true)
-        .get();
-
-    List<BookingItem> loadedBookings = [];
-
-    for (var doc in snapshot.docs) {
-      final hotelId = doc['hotelId'];
-      final bookingId = doc.id; // نحتفظ برقم الحجز للحذف
-
-      final hotelDoc = await FirebaseFirestore.instance
-          .collection('hotels')
-          .doc(hotelId)
-          .get();
-      if (hotelDoc.exists) {
-        final hotel = Hotel.fromMap(hotelDoc.data()!, hotelDoc.id);
-        loadedBookings.add(BookingItem(bookingId: bookingId, hotel: hotel));
+    try {
+      final loadedBookings = await BookingService().getUserBookings(userId!);
+      if (mounted) {
+        setState(() {
+          myBookings = loadedBookings;
+          isLoading = false;
+        });
       }
-    }
-
-    if (mounted) {
-      setState(() {
-        myBookings = loadedBookings;
-        isLoading = false;
-      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => isLoading = false);
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading bookings: $e')));
+      }
     }
   }
 
@@ -98,12 +78,9 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
     try {
       // 1. حذف من فايربيس
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .collection('bookings')
-          .doc(bookingId)
-          .delete();
+      if (userId != null) {
+        await BookingService().cancelBooking(userId!, bookingId);
+      }
 
       // 2. تحديث القائمة
       await _getData();
