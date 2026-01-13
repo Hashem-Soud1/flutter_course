@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
-import 'screens/login_screen.dart';
-import 'screens/main_navigation_screen.dart';
+import 'providers/auth_provider.dart';
+import 'providers/hotel_provider.dart';
+import 'providers/booking_provider.dart';
+import 'screens/shared/login_screen.dart';
+import 'screens/shared/main_navigation_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => HotelProvider()),
+        ChangeNotifierProvider(create: (_) => BookingProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -25,7 +37,6 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         scaffoldBackgroundColor: Colors.grey[50],
-
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.grey[100],
@@ -45,9 +56,14 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    // رصد حالة المستخدم من البروفايدر
+    final authProvider = context.watch<AuthProvider>();
 
-    if (user != null) {
+    if (authProvider.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (authProvider.user != null) {
       return const MainNavigationScreen();
     }
 

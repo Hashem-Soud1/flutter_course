@@ -5,8 +5,18 @@ import '../models/hotel.dart';
 class HotelCard extends StatelessWidget {
   final Hotel hotel;
   final VoidCallback onTap;
+  final bool isAdmin;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
-  const HotelCard({super.key, required this.hotel, required this.onTap});
+  const HotelCard({
+    super.key,
+    required this.hotel,
+    required this.onTap,
+    this.isAdmin = false,
+    this.onEdit,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +94,27 @@ class HotelCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                // أزرار التحكم للأدمن
+                if (isAdmin)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Row(
+                      children: [
+                        _AdminActionButton(
+                          icon: Icons.edit_rounded,
+                          color: Colors.blue,
+                          onPressed: onEdit,
+                        ),
+                        const SizedBox(width: 8),
+                        _AdminActionButton(
+                          icon: Icons.delete_rounded,
+                          color: Colors.red,
+                          onPressed: onDelete,
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
 
@@ -148,6 +179,41 @@ class HotelCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AdminActionButton extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final VoidCallback? onPressed;
+
+  const _AdminActionButton({
+    required this.icon,
+    required this.color,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: color, size: 20),
+        onPressed: onPressed,
+        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+        padding: EdgeInsets.zero,
       ),
     );
   }

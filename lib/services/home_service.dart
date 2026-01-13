@@ -12,8 +12,22 @@ class HomeService {
         return Hotel.fromMap(doc.data(), doc.id);
       }).toList();
     } catch (e) {
-      // You might want to handle errors more gracefully or rethrow
-      throw e;
+      rethrow;
     }
+  }
+
+  // Add a new hotel
+  Future<void> addHotel(Hotel hotel) async {
+    await _firestore.collection('hotels').add(hotel.toMap());
+  }
+
+  // Update an existing hotel
+  Future<void> updateHotel(Hotel hotel) async {
+    await _firestore.collection('hotels').doc(hotel.id).update(hotel.toMap());
+  }
+
+  // Delete a hotel
+  Future<void> deleteHotel(String hotelId) async {
+    await _firestore.collection('hotels').doc(hotelId).delete();
   }
 }
