@@ -4,25 +4,25 @@ import '../services/home_service.dart';
 
 class HotelProvider extends ChangeNotifier {
   final HomeService _homeService = HomeService();
-  List<Hotel> _hotels = [];
-  bool _isLoading = false;
-  String? _error;
+  List<Hotel> hotels = [];
+  bool isLoading = false;
+  String? error;
 
-  List<Hotel> get hotels => _hotels;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
+  HotelProvider() {
+    fetchHotels();
+  }
 
   Future<void> fetchHotels() async {
-    _isLoading = true;
-    _error = null;
+    isLoading = true;
+    error = null;
     notifyListeners();
 
     try {
-      _hotels = await _homeService.getHotels();
+      hotels = await _homeService.getHotels();
     } catch (e) {
-      _error = e.toString();
+      error = "Failed to load hotels";
     } finally {
-      _isLoading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
@@ -38,7 +38,12 @@ class HotelProvider extends ChangeNotifier {
   }
 
   Future<void> deleteHotel(String id) async {
-    await _homeService.deleteHotel(id);
-    await fetchHotels();
+    try {
+      await _homeService.deleteHotel(id);
+      await fetchHotels();
+    } catch (e) {
+      error = "Delete failed";
+      notifyListeners();
+    }
   }
 }

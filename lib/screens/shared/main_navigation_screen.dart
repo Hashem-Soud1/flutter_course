@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'home_screen.dart';
-
 import 'profile_screen.dart';
-
-import 'bookings_screen.dart'; // Import bookings screen
+import 'bookings_screen.dart';
+import '../../providers/booking_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -17,8 +18,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-
-    const BookingsScreen(), // New Booking Tab
+    const BookingsScreen(),
     const ProfileScreen(),
   ];
 
@@ -26,6 +26,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     setState(() {
       _selectedIndex = index;
     });
+
+    // If bookings tab is selected, refresh data
+    if (index == 1) {
+      final auth = context.read<AuthProvider>();
+      final bookingProvider = context.read<BookingProvider>();
+
+      if (auth.isAdmin) {
+        bookingProvider.fetchAllBookings();
+      } else if (auth.user != null) {
+        bookingProvider.fetchUserBookings(auth.user!.uid);
+      }
+    }
   }
 
   @override
@@ -41,7 +53,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             selectedIcon: Icon(Icons.home),
             label: 'Home',
           ),
-
           NavigationDestination(
             icon: Icon(Icons.airplane_ticket_outlined),
             selectedIcon: Icon(Icons.airplane_ticket),

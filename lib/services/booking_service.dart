@@ -5,6 +5,19 @@ import '../models/booking.dart';
 class BookingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // Add new booking
+  Future<void> createBooking(String userId, String hotelId) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('bookings')
+        .add({
+          'hotelId': hotelId,
+          'bookedAt': FieldValue.serverTimestamp(),
+          'status': 'confirmed',
+        });
+  }
+
   // Get user bookings
   Future<List<Booking>> getUserBookings(String userId) async {
     final snapshot = await _firestore
@@ -17,69 +30,46 @@ class BookingService {
 
     for (var doc in snapshot.docs) {
       final hotelId = doc['hotelId'];
-      final bookingId = doc.id;
-      final bookedAt = (doc['bookedAt'] as Timestamp?)?.toDate();
-
       final hotelDoc = await _firestore.collection('hotels').doc(hotelId).get();
       if (hotelDoc.exists) {
-        final hotel = Hotel.fromMap(hotelDoc.data()!, hotelDoc.id);
         loadedBookings.add(
           Booking(
-            bookingId: bookingId,
-            hotel: hotel,
+            bookingId: doc.id,
+            hotel: Hotel.fromMap(hotelDoc.data()!, hotelDoc.id),
             userId: userId,
-            bookedAt: bookedAt,
+            bookedAt: (doc['bookedAt'] as Timestamp?)?.toDate(),
           ),
         );
       }
     }
-    // الترتيب محلياً لتجنب طلب الـ Index من فايربيز
-    loadedBookings.sort((a, b) {
-      if (a.bookedAt == null) return 1;
-      if (b.bookedAt == null) return -1;
-      return b.bookedAt!.compareTo(a.bookedAt!);
-    });
     return loadedBookings;
   }
 
-  // Get ALL bookings (for Admin) using Collection Group
+  // Get ALL bookings (Admin)
   Future<List<Booking>> getAllBookings() async {
     final snapshot = await _firestore.collectionGroup('bookings').get();
-
     List<Booking> loadedBookings = [];
 
     for (var doc in snapshot.docs) {
       final hotelId = doc['hotelId'];
-      final bookingId = doc.id;
-      final bookedAt = (doc['bookedAt'] as Timestamp?)?.toDate();
-      // The path is users/{userId}/bookings/{bookingId}
       final userId = doc.reference.parent.parent!.id;
 
       final hotelDoc = await _firestore.collection('hotels').doc(hotelId).get();
       final userDoc = await _firestore.collection('users').doc(userId).get();
 
       if (hotelDoc.exists) {
-        final hotel = Hotel.fromMap(hotelDoc.data()!, hotelDoc.id);
         final userData = userDoc.exists ? userDoc.data() : null;
-
         loadedBookings.add(
           Booking(
-            bookingId: bookingId,
-            hotel: hotel,
+            bookingId: doc.id,
+            hotel: Hotel.fromMap(hotelDoc.data()!, hotelDoc.id),
             userId: userId,
             userName: userData?['name'],
-            userEmail: userData?['email'],
-            bookedAt: bookedAt,
+            bookedAt: (doc['bookedAt'] as Timestamp?)?.toDate(),
           ),
         );
       }
     }
-    // الترتيب محلياً لتجنب طلب الـ Index من فايربيز
-    loadedBookings.sort((a, b) {
-      if (a.bookedAt == null) return 1;
-      if (b.bookedAt == null) return -1;
-      return b.bookedAt!.compareTo(a.bookedAt!);
-    });
     return loadedBookings;
   }
 

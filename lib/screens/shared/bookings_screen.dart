@@ -7,28 +7,10 @@ import '../../providers/auth_provider.dart';
 import '../../models/booking.dart';
 import 'details_screen.dart';
 
-class BookingsScreen extends StatefulWidget {
+class BookingsScreen extends StatelessWidget {
   const BookingsScreen({super.key});
 
-  @override
-  State<BookingsScreen> createState() => _BookingsScreenState();
-}
-
-class _BookingsScreenState extends State<BookingsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final auth = context.read<AuthProvider>();
-      if (auth.isAdmin) {
-        context.read<BookingProvider>().loadAllBookings();
-      } else if (auth.user != null) {
-        context.read<BookingProvider>().loadUserBookings(auth.user!.uid);
-      }
-    });
-  }
-
-  Future<void> _cancelBooking(Booking booking) async {
+  Future<void> _cancelBooking(BuildContext context, Booking booking) async {
     final auth = context.read<AuthProvider>();
     final confirm = await showDialog<bool>(
       context: context,
@@ -54,17 +36,15 @@ class _BookingsScreenState extends State<BookingsScreen> {
     );
 
     if (confirm == true) {
-      if (mounted) {
-        await context.read<BookingProvider>().cancelBooking(
-          booking.userId,
-          booking.bookingId,
-          auth.isAdmin,
+      await context.read<BookingProvider>().cancelBooking(
+        booking.userId,
+        booking.bookingId,
+        auth.isAdmin,
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Booking cancelled successfully.")),
         );
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Booking cancelled successfully.")),
-          );
-        }
       }
     }
   }
@@ -83,11 +63,15 @@ class _BookingsScreenState extends State<BookingsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : bookingProvider.bookings.isEmpty
           ? _buildEmptyState()
-          : _buildBookingsList(bookingProvider.bookings, isAdmin),
+          : _buildBookingsList(context, bookingProvider.bookings, isAdmin),
     );
   }
 
-  Widget _buildBookingsList(List<Booking> bookings, bool isAdmin) {
+  Widget _buildBookingsList(
+    BuildContext context,
+    List<Booking> bookings,
+    bool isAdmin,
+  ) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: bookings.length,
@@ -144,7 +128,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                           color: Colors.red,
                           size: 20,
                         ),
-                        onPressed: () => _cancelBooking(booking),
+                        onPressed: () => _cancelBooking(context, booking),
                       ),
                     ),
                   ),
@@ -187,10 +171,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
         children: [
           Icon(Icons.airplane_ticket_outlined, size: 60, color: Colors.grey),
           SizedBox(height: 16),
-          const Text(
-            "No existing bookings",
-            style: TextStyle(color: Colors.grey),
-          ),
+          Text("No existing bookings", style: TextStyle(color: Colors.grey)),
         ],
       ),
     );

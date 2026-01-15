@@ -8,24 +8,10 @@ import '../../widgets/hotel_card.dart';
 import 'details_screen.dart';
 import '../admin/admin_edit_hotel_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // جلب البيانات عند فتح الشاشة لأول مرة
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HotelProvider>().fetchHotels();
-    });
-  }
-
-  Future<void> _deleteHotel(String id) async {
+  Future<void> _deleteHotel(BuildContext context, String id) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -45,9 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (confirm == true) {
-      if (mounted) {
-        await context.read<HotelProvider>().deleteHotel(id);
-      }
+      context.read<HotelProvider>().deleteHotel(id);
     }
   }
 
@@ -110,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   },
-                  onDelete: () => _deleteHotel(hotel.id),
+                  onDelete: () => _deleteHotel(context, hotel.id),
                   onTap: () {
                     Navigator.push(
                       context,

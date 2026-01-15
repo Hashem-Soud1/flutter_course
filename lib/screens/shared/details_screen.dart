@@ -1,66 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import '../../models/hotel.dart';
+import '../../providers/auth_provider.dart';
+import '../../services/booking_service.dart';
 
-class DetailsScreen extends StatefulWidget {
+class DetailsScreen extends StatelessWidget {
   final Hotel hotel;
 
   const DetailsScreen({super.key, required this.hotel});
 
   @override
-  State<DetailsScreen> createState() => _DetailsScreenState();
-}
-
-class _DetailsScreenState extends State<DetailsScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final auth = context.watch<AuthProvider>();
+    final user = auth.user;
+    final bookingService = BookingService();
+
     return Scaffold(
       body: Stack(
         children: [
-          // 1. صورة الخلفية الكبيرة
+          // Background Image
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             height: MediaQuery.of(context).size.height * 0.45,
             child: Hero(
-              tag: 'hotel-img-${widget.hotel.id}',
+              tag: 'hotel-img-${hotel.id}',
               child: CachedNetworkImage(
-                imageUrl: widget.hotel.imageUrl,
+                imageUrl: hotel.imageUrl,
                 fit: BoxFit.cover,
               ),
             ),
           ),
 
-          // 2. زر الرجوع + زر القلب (في الأعلى)
+          // Back Button
           Positioned(
             top: 40,
             left: 16,
-            right: 16,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // زر الرجوع
-                CircleAvatar(
-                  backgroundColor: Colors.white.withOpacity(0.8),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-              ],
+            child: CircleAvatar(
+              backgroundColor: Colors.white.withOpacity(0.8),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
           ),
 
-          // 3. المحتوى وتفاصيل الفندق
+          // Content
           Positioned.fill(
             top: MediaQuery.of(context).size.height * 0.40,
             child: Container(
@@ -79,11 +66,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          widget.hotel.name,
-                          style: TextStyle(
+                          hotel.name,
+                          style: const TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                         ),
                       ),
@@ -91,7 +77,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         children: [
                           const Icon(Icons.star, color: Colors.amber, size: 28),
                           Text(
-                            widget.hotel.rating.toString(),
+                            hotel.rating.toString(),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -108,7 +94,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        widget.hotel.address,
+                        hotel.address,
                         style: TextStyle(color: Colors.grey[600], fontSize: 16),
                       ),
                     ],
@@ -122,7 +108,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   Expanded(
                     child: SingleChildScrollView(
                       child: Text(
-                        widget.hotel.description,
+                        hotel.description,
                         style: TextStyle(
                           color: Colors.grey[600],
                           height: 1.5,
@@ -137,8 +123,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
           ),
         ],
       ),
-
-      // 4. بار الحجز السفلي
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -162,7 +146,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   style: TextStyle(color: Colors.grey),
                 ),
                 Text(
-                  "\$${widget.hotel.price.toStringAsFixed(0)}",
+                  "\$${hotel.price.toStringAsFixed(0)}",
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -181,24 +165,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   return;
                 }
 
-                // إضافة الحجز في Firestore
                 try {
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(user.uid)
-                      .collection('bookings')
-                      .add({
-                        'hotelId': widget.hotel.id,
-                        'bookedAt': FieldValue.serverTimestamp(),
-                        'status': 'confirmed',
-                      });
-
+                  await bookingService.createBooking(user.uid, hotel.id);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text(
-                          "Booking Successful! 🎉 Check 'Bookings' tab.",
-                        ),
+                        content: Text("Booking Successful! 🎉"),
                         backgroundColor: Colors.green,
                       ),
                     );

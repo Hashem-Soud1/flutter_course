@@ -4,30 +4,27 @@ import '../services/booking_service.dart';
 
 class BookingProvider extends ChangeNotifier {
   final BookingService _bookingService = BookingService();
-  List<Booking> _bookings = [];
-  bool _isLoading = false;
+  List<Booking> bookings = [];
+  bool isLoading = false;
 
-  List<Booking> get bookings => _bookings;
-  bool get isLoading => _isLoading;
-
-  Future<void> loadUserBookings(String userId) async {
-    _isLoading = true;
+  Future<void> fetchUserBookings(String userId) async {
+    isLoading = true;
     notifyListeners();
     try {
-      _bookings = await _bookingService.getUserBookings(userId);
+      bookings = await _bookingService.getUserBookings(userId);
     } finally {
-      _isLoading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> loadAllBookings() async {
-    _isLoading = true;
+  Future<void> fetchAllBookings() async {
+    isLoading = true;
     notifyListeners();
     try {
-      _bookings = await _bookingService.getAllBookings();
+      bookings = await _bookingService.getAllBookings();
     } finally {
-      _isLoading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
@@ -39,9 +36,9 @@ class BookingProvider extends ChangeNotifier {
   ) async {
     await _bookingService.cancelBooking(userId, bookingId);
     if (isAdmin) {
-      await loadAllBookings();
+      await fetchAllBookings();
     } else {
-      await loadUserBookings(userId);
+      await fetchUserBookings(userId);
     }
   }
 }

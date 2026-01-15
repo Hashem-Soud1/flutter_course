@@ -4,14 +4,9 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import 'login_screen.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
@@ -64,7 +59,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: TextButton.icon(
                 onPressed: () async {
                   await authProvider.logout();
-                  // الـ AuthWrapper سيهتم بالباقي، لكن احترازياً:
                   if (context.mounted) {
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(

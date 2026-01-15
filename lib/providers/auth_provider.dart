@@ -4,63 +4,54 @@ import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
-  User? _user;
-  bool _isAdmin = false;
-  bool _isLoading = true;
-
-  User? get user => _user;
-  bool get isAdmin => _isAdmin;
-  bool get isLoading => _isLoading;
+  User? user;
+  bool isAdmin = false;
+  bool isLoading = true;
 
   AuthProvider() {
     _init();
   }
 
+  // Check if user is logged in when app starts
   Future<void> _init() async {
-    _user = _authService.currentUser;
-    if (_user != null) {
+    user = _authService.currentUser;
+    if (user != null) {
       await _checkAdminStatus();
     }
-    _isLoading = false;
+    isLoading = false;
     notifyListeners();
   }
 
   Future<void> _checkAdminStatus() async {
-    if (_user == null) return;
+    if (user == null) return;
     try {
-      final userData = await _authService.getUserData(_user!.uid);
+      final userData = await _authService.getUserData(user!.uid);
       if (userData.exists) {
         final data = userData.data() as Map<String, dynamic>;
-        _isAdmin = data['role'] == 'admin';
-      } else {
-        _isAdmin = false;
+        isAdmin = data['role'] == 'admin';
       }
     } catch (e) {
-      _isAdmin = false;
+      isAdmin = false;
     }
   }
 
   Future<void> login(String email, String password) async {
-    _isLoading = true;
+    isLoading = true;
     notifyListeners();
     try {
-      final credential = await _authService.signIn(
-        email: email,
-        password: password,
-      );
-      _user = credential.user;
-      if (_user != null) {
-        await _authService.ensureUserDocumentExists(_user!);
+      final credential = await _authService.signIn(email, password);
+      user = credential.user;
+      if (user != null) {
         await _checkAdminStatus();
       }
     } finally {
-      _isLoading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
 
   Future<void> signUp(String email, String password, String name) async {
-    _isLoading = true;
+    isLoading = true;
     notifyListeners();
     try {
       final credential = await _authService.signUp(
@@ -68,18 +59,18 @@ class AuthProvider extends ChangeNotifier {
         password: password,
         name: name,
       );
-      _user = credential.user;
-      _isAdmin = false; // Default for new signups
+      user = credential.user;
+      isAdmin = false;
     } finally {
-      _isLoading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
 
   Future<void> logout() async {
     await _authService.signOut();
-    _user = null;
-    _isAdmin = false;
+    user = null;
+    isAdmin = false;
     notifyListeners();
   }
 }
