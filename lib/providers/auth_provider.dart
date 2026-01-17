@@ -12,7 +12,6 @@ class AuthProvider extends ChangeNotifier {
     _init();
   }
 
-  // Check if user is logged in when app starts
   Future<void> _init() async {
     user = _authService.currentUser;
     if (user != null) {
