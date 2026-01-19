@@ -105,8 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_hasGreeted) return;
 
     final name =
-        Provider.of<AuthProvider>(context, listen: false).userData?['name'] ??
-        'Guest';
+        Provider.of<AuthProvider>(context).userData?['name'] ?? 'Guest';
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -138,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (confirm == true) {
-      Provider.of<HotelProvider>(context, listen: false).deleteHotel(id);
+      Provider.of<HotelProvider>(context).deleteHotel(id);
     }
   }
 }

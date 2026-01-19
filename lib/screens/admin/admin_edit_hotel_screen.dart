@@ -127,7 +127,7 @@ class _AdminEditHotelScreenState extends State<AdminEditHotelScreen> {
       rating: double.parse(_ratingController.text),
     );
 
-    final hotelProvider = Provider.of<HotelProvider>(context, listen: false);
+    final hotelProvider = Provider.of<HotelProvider>(context);
 
     if (widget.hotel == null) {
       await hotelProvider.addHotel(hotel);

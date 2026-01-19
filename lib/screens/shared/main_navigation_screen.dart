@@ -28,11 +28,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
 
     if (index == 1) {
-      final auth = Provider.of<AuthProvider>(context, listen: false);
-      final bookingProvider = Provider.of<BookingProvider>(
-        context,
-        listen: false,
-      );
+      final auth = Provider.of<AuthProvider>(context);
+      final bookingProvider = Provider.of<BookingProvider>(context);
 
       if (auth.isAdmin) {
         bookingProvider.fetchAllBookings();

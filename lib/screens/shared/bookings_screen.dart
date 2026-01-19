@@ -10,7 +10,7 @@ class BookingsScreen extends StatelessWidget {
   const BookingsScreen({super.key});
 
   Future<void> _cancelBooking(BuildContext context, Booking booking) async {
-    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final auth = Provider.of<AuthProvider>(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -37,7 +37,6 @@ class BookingsScreen extends StatelessWidget {
     if (confirm == true) {
       await Provider.of<BookingProvider>(
         context,
-        listen: false,
       ).cancelBooking(booking.userId, booking.bookingId, auth.isAdmin);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

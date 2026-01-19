@@ -111,10 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () async {
-                      await Provider.of<AuthProvider>(
-                        context,
-                        listen: false,
-                      ).updateProfile(
+                      await Provider.of<AuthProvider>(context).updateProfile(
                         name: nameController.text.trim(),
                         phoneNumber: phoneController.text.trim(),
                         gender: gender,

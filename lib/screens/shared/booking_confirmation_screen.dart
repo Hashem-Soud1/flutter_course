@@ -49,11 +49,8 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
 
   Future<void> _handleBookingAction() async {
     setState(() => _isLoading = true);
-    final auth = Provider.of<AuthProvider>(context, listen: false);
-    final bookingProvider = Provider.of<BookingProvider>(
-      context,
-      listen: false,
-    );
+    final auth = Provider.of<AuthProvider>(context);
+    final bookingProvider = Provider.of<BookingProvider>(context);
 
     try {
       if (widget.booking != null) {

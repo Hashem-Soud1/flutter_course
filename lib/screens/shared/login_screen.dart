@@ -21,7 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await Provider.of<AuthProvider>(
         context,
-        listen: false,
       ).login(_emailController.text.trim(), _passwordController.text.trim());
       // الـ AuthWrapper سيتكفل بالانتقال تلقائياً
     } catch (e) {
