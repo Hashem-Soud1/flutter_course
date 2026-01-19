@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../providers/hotel_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../models/hotel.dart';
 import '../../widgets/hotel_card.dart';
 import 'details_screen.dart';
 import '../admin/admin_edit_hotel_screen.dart';

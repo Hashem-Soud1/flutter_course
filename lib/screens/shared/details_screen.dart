@@ -3,7 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../../models/hotel.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/booking_service.dart';
+import 'booking_confirmation_screen.dart';
 
 class DetailsScreen extends StatelessWidget {
   final Hotel hotel;
@@ -13,9 +13,7 @@ class DetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final user = auth.user;
     final isAdmin = auth.isAdmin;
-    final bookingService = BookingService();
 
     return Scaffold(
       body: Stack(
@@ -148,10 +146,10 @@ class DetailsScreen extends StatelessWidget {
                 ),
                 Text(
                   "\$${hotel.price.toStringAsFixed(0)}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E88E5),
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
               ],
@@ -177,36 +175,15 @@ class DetailsScreen extends StatelessWidget {
                     ),
                   )
                 : ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        await bookingService.createBooking(user!.uid, hotel.id);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Booking Successful! 🎉"),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text("Error: $e")));
-                        }
-                      }
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              BookingConfirmationScreen(hotel: hotel),
+                        ),
+                      );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E88E5),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
                     child: const Text(
                       "Book Now",
                       style: TextStyle(

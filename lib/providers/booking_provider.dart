@@ -35,6 +35,28 @@ class BookingProvider extends ChangeNotifier {
     bool isAdmin,
   ) async {
     await _bookingService.cancelBooking(userId, bookingId);
+    await _refresh(userId, isAdmin);
+  }
+
+  Future<void> updateBooking(
+    String userId,
+    String bookingId, {
+    required int nights,
+    required double totalPrice,
+    required DateTime checkInDate,
+    required bool isAdmin,
+  }) async {
+    await _bookingService.updateBooking(
+      userId,
+      bookingId,
+      nights: nights,
+      totalPrice: totalPrice,
+      checkInDate: checkInDate,
+    );
+    await _refresh(userId, isAdmin);
+  }
+
+  Future<void> _refresh(String userId, bool isAdmin) async {
     if (isAdmin) {
       await fetchAllBookings();
     } else {

@@ -6,7 +6,13 @@ class BookingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Add new booking
-  Future<void> createBooking(String userId, String hotelId) async {
+  Future<void> createBooking(
+    String userId,
+    String hotelId, {
+    int nights = 1,
+    double totalPrice = 0,
+    DateTime? checkInDate,
+  }) async {
     await _firestore
         .collection('users')
         .doc(userId)
@@ -15,6 +21,11 @@ class BookingService {
           'hotelId': hotelId,
           'bookedAt': FieldValue.serverTimestamp(),
           'status': 'confirmed',
+          'nights': nights,
+          'totalPrice': totalPrice,
+          'checkInDate': checkInDate != null
+              ? Timestamp.fromDate(checkInDate)
+              : null,
         });
   }
 
@@ -32,12 +43,13 @@ class BookingService {
       final hotelId = doc['hotelId'];
       final hotelDoc = await _firestore.collection('hotels').doc(hotelId).get();
       if (hotelDoc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
         loadedBookings.add(
-          Booking(
+          Booking.fromMap(
+            data: data,
             bookingId: doc.id,
-            hotel: Hotel.fromMap(hotelDoc.data()!, hotelDoc.id),
             userId: userId,
-            bookedAt: (doc['bookedAt'] as Timestamp?)?.toDate(),
+            hotel: Hotel.fromMap(hotelDoc.data()!, hotelDoc.id),
           ),
         );
       }
@@ -60,12 +72,12 @@ class BookingService {
       if (hotelDoc.exists) {
         final userData = userDoc.exists ? userDoc.data() : null;
         loadedBookings.add(
-          Booking(
+          Booking.fromMap(
+            data: doc.data() as Map<String, dynamic>,
             bookingId: doc.id,
-            hotel: Hotel.fromMap(hotelDoc.data()!, hotelDoc.id),
             userId: userId,
-            userName: userData?['name'],
-            bookedAt: (doc['bookedAt'] as Timestamp?)?.toDate(),
+            hotel: Hotel.fromMap(hotelDoc.data()!, hotelDoc.id),
+            userData: userData as Map<String, dynamic>?,
           ),
         );
       }
@@ -81,5 +93,26 @@ class BookingService {
         .collection('bookings')
         .doc(bookingId)
         .delete();
+  }
+
+  // Update booking
+  Future<void> updateBooking(
+    String userId,
+    String bookingId, {
+    required int nights,
+    required double totalPrice,
+    required DateTime checkInDate,
+  }) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('bookings')
+        .doc(bookingId)
+        .update({
+          'nights': nights,
+          'totalPrice': totalPrice,
+          'checkInDate': Timestamp.fromDate(checkInDate),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
   }
 }

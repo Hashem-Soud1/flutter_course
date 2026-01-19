@@ -5,31 +5,34 @@ import '../services/auth_service.dart';
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
   User? user;
+  Map<String, dynamic>? userData;
   bool isAdmin = false;
   bool isLoading = true;
 
   AuthProvider() {
-    _init();
+    _authService.authStateChanges.listen((User? newUser) async {
+      user = newUser;
+      if (user != null) {
+        await _loadUserData();
+      } else {
+        userData = null;
+        isAdmin = false;
+      }
+      isLoading = false;
+      notifyListeners();
+    });
   }
 
-  Future<void> _init() async {
-    user = _authService.currentUser;
-    if (user != null) {
-      await _checkAdminStatus();
-    }
-    isLoading = false;
-    notifyListeners();
-  }
-
-  Future<void> _checkAdminStatus() async {
+  Future<void> _loadUserData() async {
     if (user == null) return;
     try {
-      final userData = await _authService.getUserData(user!.uid);
-      if (userData.exists) {
-        final data = userData.data() as Map<String, dynamic>;
-        isAdmin = data['role'] == 'admin';
+      final snapshot = await _authService.getUserData(user!.uid);
+      if (snapshot.exists) {
+        userData = snapshot.data() as Map<String, dynamic>;
+        isAdmin = userData?['role'] == 'admin';
       }
-    } catch (e) {
+    } catch (_) {
+      userData = null;
       isAdmin = false;
     }
   }
@@ -38,38 +41,57 @@ class AuthProvider extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
     try {
-      final credential = await _authService.signIn(email, password);
-      user = credential.user;
-      if (user != null) {
-        await _checkAdminStatus();
-      }
-    } finally {
+      // فقط نقوم بتسجيل الدخول، والـ Stream في الأعلى سيتكفل بالباقي
+      await _authService.signIn(email, password);
+    } catch (e) {
       isLoading = false;
       notifyListeners();
+      rethrow;
     }
   }
 
-  Future<void> signUp(String email, String password, String name) async {
+  Future<void> signUp({
+    required String email,
+    required String password,
+    required String name,
+    required String phoneNumber,
+    required String gender,
+  }) async {
     isLoading = true;
     notifyListeners();
     try {
-      final credential = await _authService.signUp(
+      await _authService.signUp(
         email: email,
         password: password,
         name: name,
+        phoneNumber: phoneNumber,
+        gender: gender,
       );
-      user = credential.user;
-      isAdmin = false;
-    } finally {
+    } catch (e) {
       isLoading = false;
       notifyListeners();
+      rethrow;
     }
+  }
+
+  Future<void> updateProfile({
+    required String name,
+    required String phoneNumber,
+    required String gender,
+    required String country,
+  }) async {
+    if (user == null) return;
+    await _authService.updateUserProfile(user!.uid, {
+      'name': name,
+      'phoneNumber': phoneNumber,
+      'gender': gender,
+      'country': country,
+    });
+    await _loadUserData();
+    notifyListeners();
   }
 
   Future<void> logout() async {
     await _authService.signOut();
-    user = null;
-    isAdmin = false;
-    notifyListeners();
   }
 }

@@ -8,6 +8,9 @@ class AuthService {
   // Get current user
   User? get currentUser => _auth.currentUser;
 
+  // Auth state stream
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
+
   // Sign in
   Future<UserCredential> signIn(String email, String password) async {
     return await _auth.signInWithEmailAndPassword(
@@ -21,6 +24,8 @@ class AuthService {
     required String email,
     required String password,
     required String name,
+    required String phoneNumber,
+    required String gender,
   }) async {
     UserCredential credential = await _auth.createUserWithEmailAndPassword(
       email: email,
@@ -32,6 +37,8 @@ class AuthService {
       'uid': credential.user!.uid,
       'email': email,
       'name': name,
+      'phoneNumber': phoneNumber,
+      'gender': gender,
       'role': 'user',
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -42,6 +49,11 @@ class AuthService {
   // Get data
   Future<DocumentSnapshot> getUserData(String uid) async {
     return await _firestore.collection('users').doc(uid).get();
+  }
+
+  // Update profile
+  Future<void> updateUserProfile(String uid, Map<String, dynamic> data) async {
+    await _firestore.collection('users').doc(uid).update(data);
   }
 
   // Sign out

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../widgets/hotel_card.dart';
 import '../../providers/booking_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/booking.dart';
-import 'details_screen.dart';
+import 'booking_confirmation_screen.dart';
 
 class BookingsScreen extends StatelessWidget {
   const BookingsScreen({super.key});
@@ -73,94 +72,182 @@ class BookingsScreen extends StatelessWidget {
     bool isAdmin,
   ) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       itemCount: bookings.length,
       itemBuilder: (context, index) {
         final booking = bookings[index];
+        final checkIn = booking.checkInDate ?? DateTime.now();
+        final checkOut = checkIn.add(Duration(days: booking.nights));
 
-        return Column(
-          children: [
-            if (isAdmin)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
-                child: Row(
-                  children: [
-                    const Icon(Icons.person, size: 16, color: Colors.blue),
-                    const SizedBox(width: 4),
-                    Text(
-                      booking.userName ?? 'Unknown User',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const Spacer(),
-                    Text(
-                      booking.bookedAt != null
-                          ? "${booking.bookedAt!.day}/${booking.bookedAt!.month}"
-                          : "",
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-            Stack(
+        return Card(
+          elevation: 2,
+          margin: const EdgeInsets.only(bottom: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                HotelCard(
-                  hotel: booking.hotel,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            DetailsScreen(hotel: booking.hotel),
-                      ),
-                    );
-                  },
-                ),
-                if (!isAdmin)
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white.withOpacity(0.9),
-                      radius: 20,
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.close,
-                          color: Colors.red,
-                          size: 20,
-                        ),
-                        onPressed: () => _cancelBooking(context, booking),
-                      ),
-                    ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    booking.hotel.imageUrl,
+                    height: 100,
+                    width: 100,
+                    fit: BoxFit.cover,
                   ),
+                ),
+                const SizedBox(width: 12),
+                // Info on the right
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              booking.hotel.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "\$${booking.totalPrice.toStringAsFixed(0)}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E88E5),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      if (isAdmin)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            "Guest: ${booking.userName ?? 'User'}",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.orange[800],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.nightlight_round,
+                            size: 12,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "${booking.nights} nights",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          _compactDateInfo("In", checkIn),
+                          const SizedBox(width: 16),
+                          _compactDateInfo("Out", checkOut),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              "Confirmed",
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                          const Spacer(), // Added Spacer
+                          if (!isAdmin) ...[
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        BookingConfirmationScreen(
+                                          hotel: booking.hotel,
+                                          booking: booking,
+                                        ),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "Edit",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            GestureDetector(
+                              onTap: () => _cancelBooking(context, booking),
+                              child: const Text(
+                                "Cancel",
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-            if (!isAdmin)
-              Transform.translate(
-                offset: const Offset(0, -25),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  child: const Text(
-                    "Confirmed ✅",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
-            const SizedBox(height: 10),
-          ],
+          ),
         );
       },
+    );
+  }
+
+  Widget _compactDateInfo(String label, DateTime date) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+        Text(
+          "${date.day}/${date.month}/${date.year}",
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        ),
+      ],
     );
   }
 

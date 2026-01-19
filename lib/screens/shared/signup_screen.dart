@@ -13,6 +13,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  String _gender = 'Male';
   final _formKey = GlobalKey<FormState>();
 
   Future<void> _handleSignup() async {
@@ -20,9 +22,11 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       await context.read<AuthProvider>().signUp(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-        _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        name: _nameController.text.trim(),
+        phoneNumber: _phoneController.text.trim(),
+        gender: _gender,
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -56,16 +60,59 @@ class _SignupScreenState extends State<SignupScreen> {
                       labelText: 'Full Name',
                       prefixIcon: Icon(Icons.person_outline),
                     ),
-                    validator: (v) => v!.isEmpty ? 'Enter name' : null,
+                    validator: (v) =>
+                        v!.isEmpty ? 'Please enter your name' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(
-                      labelText: 'Email',
+                      labelText: 'Email Address',
                       prefixIcon: Icon(Icons.email_outlined),
                     ),
-                    validator: (v) => v!.isEmpty ? 'Enter email' : null,
+                    validator: (v) =>
+                        v!.isEmpty ? 'Please enter your email' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                      labelText: 'Phone Number',
+                      prefixIcon: Icon(Icons.phone_outlined),
+                    ),
+                    validator: (v) =>
+                        v!.isEmpty ? 'Please enter your phone number' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Gender:', style: TextStyle(fontSize: 16)),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: RadioListTile<String>(
+                          title: const Text('Male'),
+                          value: 'Male',
+                          groupValue: _gender,
+                          onChanged: (value) {
+                            setState(() {
+                              _gender = value!;
+                            });
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: RadioListTile<String>(
+                          title: const Text('Female'),
+                          value: 'Female',
+                          groupValue: _gender,
+                          onChanged: (value) {
+                            setState(() {
+                              _gender = value!;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -75,19 +122,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       labelText: 'Password',
                       prefixIcon: Icon(Icons.lock_outline),
                     ),
-                    validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
+                    validator: (v) =>
+                        v!.length < 6 ? 'Minimum 6 characters' : null,
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: isLoading ? null : _handleSignup,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: const Color(0xFF1E88E5),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                     child: isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text(
