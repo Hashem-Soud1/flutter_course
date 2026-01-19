@@ -7,38 +7,26 @@ import '../../widgets/hotel_card.dart';
 import 'details_screen.dart';
 import '../admin/admin_edit_hotel_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  Future<void> _deleteHotel(BuildContext context, String id) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Hotel'),
-        content: const Text('Are you sure you want to delete this hotel?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-    if (confirm == true) {
-      context.read<HotelProvider>().deleteHotel(id);
-    }
-  }
+class _HomeScreenState extends State<HomeScreen> {
+  bool _hasGreeted = false;
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   Future.delayed(Duration.zero, () => _showWelcomeMessage());
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final hotelProvider = context.watch<HotelProvider>();
-    final authProvider = context.watch<AuthProvider>();
-    final isAdmin = authProvider.isAdmin;
+    final hotelProvider = Provider.of<HotelProvider>(context);
+    final isAdmin = Provider.of<AuthProvider>(context).isAdmin;
 
     return Scaffold(
       appBar: AppBar(
@@ -70,41 +58,87 @@ class HomeScreen extends StatelessWidget {
             ),
         ],
       ),
-      body: hotelProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : hotelProvider.error != null
-          ? Center(child: Text(hotelProvider.error!))
-          : hotelProvider.hotels.isEmpty
-          ? const Center(child: Text("No hotels found"))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: hotelProvider.hotels.length,
-              itemBuilder: (context, index) {
-                final hotel = hotelProvider.hotels[index];
-                return HotelCard(
-                  hotel: hotel,
-                  isAdmin: isAdmin,
-                  onEdit: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            AdminEditHotelScreen(hotel: hotel),
-                      ),
-                    );
-                  },
-                  onDelete: () => _deleteHotel(context, hotel.id),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailsScreen(hotel: hotel),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+      body: _buildHomeBody(hotelProvider, isAdmin),
     );
+  }
+
+  Widget _buildHomeBody(HotelProvider hotelProvider, bool isAdmin) {
+    if (hotelProvider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (hotelProvider.hotels.isEmpty) {
+      return const Center(child: Text("No hotels found"));
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: hotelProvider.hotels.length,
+      itemBuilder: (context, index) {
+        final hotel = hotelProvider.hotels[index];
+        return HotelCard(
+          hotel: hotel,
+          isAdmin: isAdmin,
+          onEdit: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AdminEditHotelScreen(hotel: hotel),
+              ),
+            );
+          },
+          onDelete: () => _deleteHotel(context, hotel.id),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailsScreen(hotel: hotel),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showWelcomeMessage() {
+    if (_hasGreeted) return;
+
+    final name =
+        Provider.of<AuthProvider>(context, listen: false).userData?['name'] ??
+        'Guest';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Welcome, $name! 👋'),
+        backgroundColor: Colors.blue,
+      ),
+    );
+
+    _hasGreeted = true;
+  }
+
+  Future<void> _deleteHotel(BuildContext context, String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Hotel'),
+        content: const Text('Are you sure you want to delete this hotel?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      Provider.of<HotelProvider>(context, listen: false).deleteHotel(id);
+    }
   }
 }

@@ -21,7 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      await context.read<AuthProvider>().signUp(
+      await Provider.of<AuthProvider>(context, listen: false).signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
         name: _nameController.text.trim(),
@@ -40,7 +40,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = context.watch<AuthProvider>().isLoading;
+    final isLoading = Provider.of<AuthProvider>(context).isLoading;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Create Account')),

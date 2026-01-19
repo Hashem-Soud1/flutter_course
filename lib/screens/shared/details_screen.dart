@@ -12,7 +12,7 @@ class DetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final auth = Provider.of<AuthProvider>(context);
     final isAdmin = auth.isAdmin;
 
     return Scaffold(

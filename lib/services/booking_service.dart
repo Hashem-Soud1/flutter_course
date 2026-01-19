@@ -5,7 +5,6 @@ import '../models/booking.dart';
 class BookingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Add new booking
   Future<void> createBooking(
     String userId,
     String hotelId, {
@@ -29,7 +28,6 @@ class BookingService {
         });
   }
 
-  // Get user bookings
   Future<List<Booking>> getUserBookings(String userId) async {
     final snapshot = await _firestore
         .collection('users')
@@ -57,7 +55,6 @@ class BookingService {
     return loadedBookings;
   }
 
-  // Get ALL bookings (Admin)
   Future<List<Booking>> getAllBookings() async {
     final snapshot = await _firestore.collectionGroup('bookings').get();
     List<Booking> loadedBookings = [];
@@ -85,7 +82,6 @@ class BookingService {
     return loadedBookings;
   }
 
-  // Cancel booking
   Future<void> cancelBooking(String userId, String bookingId) async {
     await _firestore
         .collection('users')
@@ -95,7 +91,6 @@ class BookingService {
         .delete();
   }
 
-  // Update booking
   Future<void> updateBooking(
     String userId,
     String bookingId, {

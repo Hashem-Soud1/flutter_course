@@ -19,10 +19,10 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      await context.read<AuthProvider>().login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
+      await Provider.of<AuthProvider>(
+        context,
+        listen: false,
+      ).login(_emailController.text.trim(), _passwordController.text.trim());
       // الـ AuthWrapper سيتكفل بالانتقال تلقائياً
     } catch (e) {
       if (mounted) {
@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = context.watch<AuthProvider>().isLoading;
+    final isLoading = Provider.of<AuthProvider>(context).isLoading;
 
     return Scaffold(
       body: SafeArea(

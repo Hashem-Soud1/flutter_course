@@ -27,10 +27,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       _selectedIndex = index;
     });
 
-    // If bookings tab is selected, refresh data
     if (index == 1) {
-      final auth = context.read<AuthProvider>();
-      final bookingProvider = context.read<BookingProvider>();
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      final bookingProvider = Provider.of<BookingProvider>(
+        context,
+        listen: false,
+      );
 
       if (auth.isAdmin) {
         bookingProvider.fetchAllBookings();

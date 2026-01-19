@@ -10,7 +10,7 @@ class BookingsScreen extends StatelessWidget {
   const BookingsScreen({super.key});
 
   Future<void> _cancelBooking(BuildContext context, Booking booking) async {
-    final auth = context.read<AuthProvider>();
+    final auth = Provider.of<AuthProvider>(context, listen: false);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -35,11 +35,10 @@ class BookingsScreen extends StatelessWidget {
     );
 
     if (confirm == true) {
-      await context.read<BookingProvider>().cancelBooking(
-        booking.userId,
-        booking.bookingId,
-        auth.isAdmin,
-      );
+      await Provider.of<BookingProvider>(
+        context,
+        listen: false,
+      ).cancelBooking(booking.userId, booking.bookingId, auth.isAdmin);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Booking cancelled successfully.")),
@@ -50,8 +49,8 @@ class BookingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bookingProvider = context.watch<BookingProvider>();
-    final authProvider = context.watch<AuthProvider>();
+    final bookingProvider = Provider.of<BookingProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
     final isAdmin = authProvider.isAdmin;
 
     return Scaffold(

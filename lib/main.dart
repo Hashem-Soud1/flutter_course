@@ -5,8 +5,7 @@ import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/hotel_provider.dart';
 import 'providers/booking_provider.dart';
-import 'screens/shared/login_screen.dart';
-import 'screens/shared/main_navigation_screen.dart';
+import 'screens/shared/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,27 +45,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const AuthWrapper(),
+      home: const SplashScreen(),
     );
-  }
-}
-
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // رصد حالة المستخدم من البروفايدر
-    final authProvider = context.watch<AuthProvider>();
-
-    if (authProvider.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    if (authProvider.user != null) {
-      return const MainNavigationScreen();
-    }
-
-    return const LoginScreen();
   }
 }

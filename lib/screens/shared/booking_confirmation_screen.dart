@@ -49,8 +49,11 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
 
   Future<void> _handleBookingAction() async {
     setState(() => _isLoading = true);
-    final auth = context.read<AuthProvider>();
-    final bookingProvider = context.read<BookingProvider>();
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final bookingProvider = Provider.of<BookingProvider>(
+      context,
+      listen: false,
+    );
 
     try {
       if (widget.booking != null) {
@@ -111,7 +114,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userData = context.watch<AuthProvider>().userData;
+    final userData = Provider.of<AuthProvider>(context).userData;
 
     final isEdit = widget.booking != null;
 

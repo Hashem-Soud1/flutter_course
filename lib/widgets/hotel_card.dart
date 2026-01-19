@@ -38,7 +38,6 @@ class HotelCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // قسم الصورة
             Stack(
               children: [
                 ClipRRect(
@@ -65,7 +64,6 @@ class HotelCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // شارة التقييم
                 Positioned(
                   top: 12,
                   right: 12,
@@ -94,23 +92,38 @@ class HotelCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // أزرار التحكم للأدمن
                 if (isAdmin)
                   Positioned(
                     top: 12,
                     left: 12,
                     child: Row(
                       children: [
-                        _AdminActionButton(
-                          icon: Icons.edit_rounded,
-                          color: Colors.blue,
-                          onPressed: onEdit,
+                        CircleAvatar(
+                          backgroundColor: Colors.white,
+                          radius: 18,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.edit,
+                              color: Colors.blue,
+                              size: 18,
+                            ),
+                            onPressed: onEdit,
+                            padding: EdgeInsets.zero,
+                          ),
                         ),
                         const SizedBox(width: 8),
-                        _AdminActionButton(
-                          icon: Icons.delete_rounded,
-                          color: Colors.red,
-                          onPressed: onDelete,
+                        CircleAvatar(
+                          backgroundColor: Colors.white,
+                          radius: 18,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.red,
+                              size: 18,
+                            ),
+                            onPressed: onDelete,
+                            padding: EdgeInsets.zero,
+                          ),
                         ),
                       ],
                     ),
@@ -118,7 +131,6 @@ class HotelCard extends StatelessWidget {
               ],
             ),
 
-            // قسم المعلومات
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -152,7 +164,6 @@ class HotelCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // السعر
                   RichText(
                     text: TextSpan(
                       children: [
@@ -179,41 +190,6 @@ class HotelCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _AdminActionButton extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final VoidCallback? onPressed;
-
-  const _AdminActionButton({
-    required this.icon,
-    required this.color,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: color, size: 20),
-        onPressed: onPressed,
-        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-        padding: EdgeInsets.zero,
       ),
     );
   }

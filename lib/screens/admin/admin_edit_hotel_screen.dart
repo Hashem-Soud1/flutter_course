@@ -20,7 +20,6 @@ class _AdminEditHotelScreenState extends State<AdminEditHotelScreen> {
   final _priceController = TextEditingController();
   final _addressController = TextEditingController();
   final _ratingController = TextEditingController();
-  bool _isSaving = false;
 
   @override
   void initState() {
@@ -32,41 +31,6 @@ class _AdminEditHotelScreenState extends State<AdminEditHotelScreen> {
       _priceController.text = widget.hotel!.price.toString();
       _addressController.text = widget.hotel!.address;
       _ratingController.text = widget.hotel!.rating.toString();
-    }
-  }
-
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isSaving = true);
-
-    try {
-      final hotel = Hotel(
-        id: widget.hotel?.id ?? '',
-        name: _nameController.text.trim(),
-        description: _descriptionController.text.trim(),
-        imageUrl: _imageUrlController.text.trim(),
-        price: double.parse(_priceController.text.trim()),
-        address: _addressController.text.trim(),
-        rating: double.tryParse(_ratingController.text.trim()) ?? 0.0,
-      );
-
-      final hotelProvider = context.read<HotelProvider>();
-      if (widget.hotel == null) {
-        await hotelProvider.addHotel(hotel);
-      } else {
-        await hotelProvider.updateHotel(hotel);
-      }
-
-      if (mounted) Navigator.pop(context, true);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -135,14 +99,12 @@ class _AdminEditHotelScreenState extends State<AdminEditHotelScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isSaving ? null : _save,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
+                  onPressed: _save,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                  child: Text(
+                    isEditing ? 'Update Hotel' : 'Add Hotel',
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
                   ),
-                  child: _isSaving
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(isEditing ? 'Update Hotel' : 'Add Hotel'),
                 ),
               ),
             ],
@@ -150,5 +112,29 @@ class _AdminEditHotelScreenState extends State<AdminEditHotelScreen> {
         ),
       ),
     );
+  }
+
+  void _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final hotel = Hotel(
+      id: widget.hotel?.id ?? '',
+      name: _nameController.text,
+      description: _descriptionController.text,
+      imageUrl: _imageUrlController.text,
+      price: double.parse(_priceController.text),
+      address: _addressController.text,
+      rating: double.parse(_ratingController.text),
+    );
+
+    final hotelProvider = Provider.of<HotelProvider>(context, listen: false);
+
+    if (widget.hotel == null) {
+      await hotelProvider.addHotel(hotel);
+    } else {
+      await hotelProvider.updateHotel(hotel);
+    }
+
+    Navigator.pop(context);
   }
 }

@@ -111,7 +111,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () async {
-                      await context.read<AuthProvider>().updateProfile(
+                      await Provider.of<AuthProvider>(
+                        context,
+                        listen: false,
+                      ).updateProfile(
                         name: nameController.text.trim(),
                         phoneNumber: phoneController.text.trim(),
                         gender: gender,
@@ -133,7 +136,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
+    final authProvider = Provider.of<AuthProvider>(context);
     final userData = authProvider.userData;
     final user = authProvider.user;
 
@@ -142,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final String phone = userData?['phoneNumber'] ?? 'Not provided';
     final String gender = userData?['gender'] ?? 'Not specified';
     final String country = userData?['country'] ?? 'Palestine';
-    final String initial = name.isNotEmpty ? name[0].toUpperCase() : 'U';
+    final String initial = name[0].toUpperCase();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -153,12 +156,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             onPressed: () => _showEditDialog(context, userData),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              // Settings logic could go here
-            },
           ),
         ],
       ),

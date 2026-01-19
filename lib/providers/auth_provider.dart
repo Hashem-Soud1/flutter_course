@@ -41,7 +41,6 @@ class AuthProvider extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
     try {
-      // فقط نقوم بتسجيل الدخول، والـ Stream في الأعلى سيتكفل بالباقي
       await _authService.signIn(email, password);
     } catch (e) {
       isLoading = false;
